@@ -1,0 +1,209 @@
+﻿@model T120B143.Models.CommentModel
+
+<div class="container">
+    <div class="row" id="comentsholder">
+
+        @if (Model != null & Model.Comments != null && Model.Comments.Any())
+        {
+            <h2 style="font-family: 'Julius Sans One', sans-serif">Comments</h2>
+
+            foreach (var com in Model.Order("asc"))
+            {
+                <div class="media">
+                    <div class="media-left">
+                        <a>
+                            <img class="media-object" src="@Model.GetImg(com)" style="width: 64px; height: 64px;">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading">@Model.GetName(com)</h4>
+                        <p class="media-text">
+                            @com.CommentText
+                        </p>
+                        <div class="media-date" alt="Date of creation: @com.Created" class="date">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="container">
+                                        <button class="btn btn-xs btn-link up" style="font-size:25px;" comid="@com.Id">
+                                            <i class="fa fa-thumbs-up" style="color:green"></i>
+                                        </button>
+                                        <span class="badge badge-notify" style="font-size:10px;">@com.Likes</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="container">
+                                        <button class="btn btn-xs btn-link down" style="font-size:25px;" comid="@com.Id">
+                                            <i class="fa fa-thumbs-down" style="color:darkred"></i>
+                                        </button>
+                                        <span class="badge badge-notify" style="font-size:10px;">@com.Dislikes</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <p>@com.Created</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"> </div>
+                </div>
+                <hr />
+            }
+        }
+
+        <form asp-action="AddComment"
+              style="padding-top: 50px; width: 100%; float: left"
+              enctype="multipart/form-data">
+            <h2 style="font-family: 'Julius Sans One', sans-serif">Leave a comment</h2>
+            <div class="form-group" style="width: 48%; float: left">
+                <label class="control-label">First Name</label>
+                <input asp-for="Name" required type="text" class="form-control1" id="username" placeholder="Type first name here">
+                <span asp-validation-for="Name" id="nameerror" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="width: 48%; float: right">
+                <label class="control-label">Last Name</label>
+                <input asp-for="LastName" required type="text" class="form-control1" id="userlastname" placeholder="Type last name here">
+                <span asp-validation-for="LastName" id="lnameerror" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="width: 60%; float: left">
+                <label class="control-label">Company</label>
+                <input asp-for="Company" required type="text" class="form-control1" id="company" placeholder="Type email here">
+                <span asp-validation-for="Company" id="companyerror" class="text-danger"></span>
+            </div>
+
+            <div class="form-group" style="width: 40%; float: right; padding-left: 10%">
+                <label class="control-label">Gender</label></br>
+                <label class="radio-inline"><input type="radio" id="male" name="optradio" checked>Male</label>
+                <label class="radio-inline"><input type="radio" id="female" name="optradio">Female</label>
+            </div>
+
+            <div class="form-group" style="width: 65%; float: left">
+                <label class="control-label">Image url</label>
+                <input asp-for="ImageUrl" required type="text" class="form-control1" id="imgUrl" placeholder="Enter your image address">
+                <span asp-validation-for="ImageUrl" id="imageerror" class="text-info"></span>
+            </div>
+
+            <div class="form-group" style="width: 100%; float: left; padding-bottom: 0">
+                <label class="control-label">Message</label>
+                <textarea asp-for="CommentText"
+                          required type="text"
+                          rows="20"
+                          style="height: 125px;
+                          min-width: 100%;
+                          max-width: 100%;
+                          resize: none"
+                          id="message"
+                          class="form-control1"
+                          placeholder="Your message goes here">
+
+                </textarea>
+                <span asp-validation-for="CommentText" id="messageerror" class="text-danger"></span>
+            </div>
+            <div class="form-group comments-submit" style="width: 100%; float: left">
+                <input class="btn btn-primary" type="button" id="submitdata" value="Siųsti">
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var findthis = $(".badge-notify");
+
+        var gender = false;
+        $('#male').on("click", function () {
+            if ($('#male').is(':checked')) { gender = false; }
+        });
+
+        $('#female').on("click", function () {
+            if ($('#female').is(':checked')) { gender = true; }
+        });
+
+        $("#submitdata").on("click", function () {
+            var error = false;
+            var name = $("#username").val();
+            if (name.length < 3) {
+                $("#nameerror").text("Name lenght must be atleast 3 char");
+                error = true;
+            }
+            var lname = $("#userlastname").val();
+            if (lname.length < 3) {
+                $("#lnameerror").text("Last name lenght must be atleast 3 char");
+                error = true;
+            }
+            var company = $("#company").val();
+            if (company.length < 3) {
+                $("#companyerror").text("Company lenght must be atleast 3 char");
+                error = true;
+            }
+            var message = $("#message").val();
+            if (message.length < 20) {
+                $("#messageerror").text("Message lenght must be atleast 3 words");
+                error = true;
+            }
+            var img = $("#imgUrl").val();
+            if (img.length < 3) {
+                $("#imageerror").text("No image realy?");
+            }
+
+            if (error)
+                return;
+
+            var data = {
+                "name": name,
+                "lastname": lname,
+                "company": company,
+                "message": message,
+                "gender": gender,
+                "img": img
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/api/CommentApi/add",
+                // The key needs to match your method's input parameter (case-sensitive).
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                },
+                failure: function (errMsg) {
+                    alert(errMsg);
+                }
+            });
+
+            location.reload();
+
+            $("#username").val("");
+            $("#userlastname").val("");
+            $("#company").val("");
+            $("#message").val("");
+            $("#imgUrl").val("");
+        });
+
+        $(".up").on("click", function () {
+            var a = $(this).parent().find(findthis);
+            var number = parseInt(a.text());
+            number = number + 1;
+            a.html(number);
+
+            var id = $(this).attr("comid")
+
+            $.post("/api/CommentApi/like/" + id,
+                function (data, status) {
+                });
+        });
+
+        $(".down").on("click", function () {
+            var a = $(this).parent().find(findthis);
+            var number = parseInt(a.text());
+            number = number + 1;
+            a.html(number);
+            var id = $(this).attr("comid")
+
+            $.post("/api/CommentApi/dislike/" + id,
+                function (data, status) {
+                });
+        });
+    });
+</script>
